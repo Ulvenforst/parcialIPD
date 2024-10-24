@@ -1,31 +1,19 @@
-### Secuencial 
+Para calcular el tiempo de ejecución de la versión secuencial eliminando el tiempo más bajo y el más alto, haremos lo siguiente:
 
-Tiempos:
-real    0m39.304s
-user    1m32.317s
-sys     0m3.088s
+### Tiempos observados:
+- **real:** 0m10.506s, 0m7.466s, 0m7.466s, 0m7.668s, 0m10.489s
 
-real    0m38.759s
-user    1m31.762s
-sys     0m2.587s
+### Procedimiento:
+1. **Eliminar el tiempo más bajo**: 0m7.466s
+2. **Eliminar el tiempo más alto**: 0m10.506s
+3. **Tiempos restantes**: 0m7.466s, 0m7.668s, 0m10.489s
+4. **Convertir a segundos**:
+   - 0m7.466s = 7.466 segundos
+   - 0m7.668s = 7.668 segundos
+   - 0m10.489s = 10.489 segundos
+5. **Promedio**:
+   \[
+   \frac{7.466 + 7.668 + 10.489}{3} = \frac{25.623}{3} = 8.541 \text{ segundos}
+   \]
 
-real    0m38.996s
-user    1m31.959s
-sys     0m2.834s
-
-Promedios:
-
-real:
-(39.304 + 38.759 + 38.996) / 3 = 39.019 segundos
-
-user:
-(92.317 + 91.762 + 91.959) / 3 = 92.013 segundos
-
-sys:
-(3.088 + 2.587 + 2.834) / 3 = 2.836 segundos
-
-3 conjuntos de tiempos es:
-
-real: 39.019 segundos
-user: 92.013 segundos
-sys: 2.836 segundos
+Por lo tanto, el tiempo promedio de ejecución secuencial es **8.541 segundos**.
