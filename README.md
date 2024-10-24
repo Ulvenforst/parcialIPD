@@ -4,11 +4,11 @@ Tiempos:
 real    0m39.304s
 user    1m32.317s
 sys     0m3.088s
-<\br>
+
 real    0m38.759s
 user    1m31.762s
 sys     0m2.587s
-<\br>
+
 real    0m38.996s
 user    1m31.959s
 sys     0m2.834s
