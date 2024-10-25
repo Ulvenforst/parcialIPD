@@ -10,7 +10,7 @@
    - 0m7.668s = 7.668 segundos
    - 0m10.489s = 10.489 segundos
 5. **Promedio**:
-   
+
    $$
    \frac{7.466 + 7.668 + 10.489}{3} = \frac{25.623}{3} = 8.541 \text{ segundos}
    $$
@@ -18,7 +18,7 @@
 El tiempo promedio de ejecución secuencial es **8.541 segundos**.
 
 
-### Paralela N:
+### Paralela N*2:
 - **real:** 0m7.035s, 0m7.385s, 0m7.385s, 0m7.120s
 
 ### Procedimiento:
