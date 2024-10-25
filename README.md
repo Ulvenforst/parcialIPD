@@ -29,7 +29,7 @@ El tiempo promedio de ejecución secuencial es **8.541 segundos**.
    - 0m7.385s = 7.385 segundos
    - 0m7.120s = 7.120 segundos
 5. **Promedio**:
-   
+
    $$
    \frac{7.385 + 7.120}{2} = \frac{14.505}{2} = 7.2525 \text{ segundos}
    $$
