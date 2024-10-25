@@ -72,9 +72,7 @@ Siguiendo el procedimiento:
 3. **Tiempos restantes**: 0m7.385s, 0m7.120s
 4. **Promedio**:
 
-   $$
-   \frac{7.385 + 7.120}{2} = \frac{14.505}{2} = 7.253 \text{ segundos}
-   $$
+$$\frac{7.385 + 7.120}{2} = \frac{14.505}{2} = 7.253 \text{ segundos}$$
 
 Por lo tanto, el tiempo promedio de ejecución con los hilos configurados es **7.253 segundos**.
 
