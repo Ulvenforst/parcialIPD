@@ -58,7 +58,7 @@ Siguiendo el mismo procedimiento:
    $$
    \frac{7.388 + 7.506 + 7.385}{3} = \frac{22.279}{3} = 7.426 \text{ segundos}
    $$
-
+  
 Por lo tanto, el tiempo promedio de ejecución con esta versión es **7.426 segundos**.
 
 #### Ejecución Paralela con 2N hilos (Número de hilos = 16):
