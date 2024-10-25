@@ -135,4 +135,3 @@ La eficiencia de **0.144** con 8 hilos sugiere que el programa está utilizando 
 ### Conclusión
 
 El uso de OpenMP permitió una mejora moderada en el tiempo de ejecución, pero la escalabilidad se ve limitada por la naturaleza del código y las características del hardware. Una posible área de optimización sería reducir la sobrecarga de sincronización y mejorar el paralelismo de las secciones críticas del código.
->>>>>>> 65654a495c2b48d817acd6ba0b1339f7f7ac683f
