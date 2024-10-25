@@ -1,129 +1,138 @@
-# Procesamiento de imágenes
+### Análisis de Desempeño y Speedup del Programa Paralelizado
 
-Este directorio contiene un conjunto de códigos que permiten aplicar un conjunto de filtros básicos a una imagen usando el lenguaje C.
-Los filtros que se pueden aplicar son:
+El objetivo de este análisis es medir el desempeño del programa paralelo y secuencial, calcular el **speedup** y discutir la **eficiencia** de la paralelización. El código fue ejecutado en un equipo con las siguientes características de hardware:
 
-- Filtro de desenfoque.
-- Filtro de detección de bordes.
-- Filtro de Realce. 
-
-El programa `main.c` contiene el código para aplicar estos filtros.
-Este programa lee la información de los bits que representan una imagen y hace las transformaciones necesarias.
-Se han desarrollado dos scripts en Python que permiten extraer los bits de información de una imagen en formato PNG (`fromPNG2Bin.py`) y toma un conjunto de bits y los almacena de regreso en una imagen en formato PNG (`fromBin2PNG.py`).
-
-Se ha desarrollado un script en Bash llamado `all.sh` y el cual integra los códigos descritos anteriormente para aplicar un filtro a una imagen. 
-
-El `Makefile` permite la compilación y ejecución de los códigos/archivos descritos anteriormente.
-
-- `make all` permite la compilación y la ejecución del programa.
-- `make compile` permite la compilación del programa `main.c`.
-- `make clean` borra archivos creados durante la compilación y la ejecución del programa.
-
-## Descripción 
-
-El script `all.sh` usa tres programas le aplican un filtro a una imagen PNG de 1024x1024.
-
-El script `all.sh` contiene lo siguiente:
-
-```
-#!/usr/bin/env bash
-INPUT_PNG="image.png"
-TEMP_FILE="image.bin"
-python3 fromPNG2Bin.py ${INPUT_PNG}
-./main ${TEMP_FILE}
-python3 fromBin2PNG.py ${TEMP_FILE}.new
-```
-
-Los tres programas que se usan son `fromPNG2Bin.py`, `fromBin2PNG.py` y `main`. 
-En este caso se asume que `image.png` es una imagen PNG de 1024x1024.
-Lo que hace el script `fromPNG2Bin.py` es convertir la imagen de formanto PNG a una secuencia de pixeles.
-Esa secuencia de pixeles queda almacenada en `image.bin` (`${TEMP_FILE}`).
-Sobre los datos en `image.bin` se aplica un filtro que está en el archivo `./main`. 
-Al terminar la ejecución del programa `main` se genera un archivo en este caso llamado `image.bin.new`.
-El archivo `image.bin.new` es pasado al script `fromBin2PNG.py` y genera un nuevo archivo llamado `image.bin.PNG`. 
-Este archivo es el archivo que contiene el PNG alterado.
-
-## Otros posibles filtros
-
-Para usar los filtros que se presentan a continuación se debe cambiar la función `aplicarFiltro` que se encuentra en el programa `main.c`.
-
-### Filtro de desenfoque (Blur Filter)
-
-```
-void aplicarFiltro(int *imagen, int *imagenProcesada, int width, int height) {
-    // Recorre cada píxel de la imagen (excepto los bordes)
-    for (int y = 1; y < height - 1; y++) {
-        for (int x = 1; x < width - 1; x++) {
-            // Promedia los valores de los píxeles vecinos
-            int sum = 0;
-            sum += imagen[(y - 1) * width + (x - 1)];  // Superior Izquierda
-            sum += imagen[(y - 1) * width + x];        // Superior
-            sum += imagen[(y - 1) * width + (x + 1)];  // Superior Derecha
-            sum += imagen[y * width + (x - 1)];        // Izquierda
-            sum += imagen[y * width + x];              // Centro
-            sum += imagen[y * width + (x + 1)];        // Derecha
-            sum += imagen[(y + 1) * width + (x - 1)];  // Inferior Izquierda
-            sum += imagen[(y + 1) * width + x];        // Inferior
-            sum += imagen[(y + 1) * width + (x + 1)];  // Inferior Derecha
-
-            imagenProcesada[y * width + x] = sum / 9;  // Asigna el promedio al píxel procesado
-        }
-    }
+#### Especificaciones del hardware:
+```json
+{
+  "vendor_id": "AuthenticAMD",
+  "cpu_family": 23,
+  "model": 96,
+  "model_name": "AMD Ryzen 9 4900HS with Radeon Graphics",
+  "stepping": 1,
+  "cpu_MHz": 2994.397,
+  "cache_size": "512 KB",
+  "physical_id": 0,
+  "siblings": 16,
+  "core_id": 0,
+  "cpu_cores": 8
 }
-
 ```
 
-### Filtro de detección de bordes (Edge Detection) - Filtro Sobel
+Este procesador tiene **8 núcleos físicos** y puede manejar hasta **16 hilos** en paralelo.
 
-```
-void aplicarFiltro(int *imagen, int *imagenProcesada, int width, int height) {
-    int Gx[3][3] = {{-1, 0, 1}, {-2, 0, 2}, {-1, 0, 1}};
-    int Gy[3][3] = {{-1, -2, -1}, {0, 0, 0}, {1, 2, 1}};
+### Modificación del Makefile
 
-    for (int y = 1; y < height - 1; y++) {
-        for (int x = 1; x < width - 1; x++) {
-            int sumX = 0;
-            int sumY = 0;
+El **Makefile** fue modificado para compilar la versión paralela del programa utilizando **OpenMP**. De esta forma, las versiones paralelas se ejecutan correctamente con soporte de múltiples hilos, mientras que la versión secuencial se corre utilizando el comando `time make`.
 
-            // Aplicar máscaras de Sobel (Gx y Gy)
-            for (int ky = -1; ky <= 1; ky++) {
-                for (int kx = -1; kx <= 1; kx++) {
-                    sumX += imagen[(y + ky) * width + (x + kx)] * Gx[ky + 1][kx + 1];
-                    sumY += imagen[(y + ky) * width + (x + kx)] * Gy[ky + 1][kx + 1];
-                }
-            }
+### Resultados de Ejecución
 
-            // Calcular magnitud del gradiente
-            int magnitude = abs(sumX) + abs(sumY);
-            imagenProcesada[y * width + x] = (magnitude > 255) ? 255 : magnitude;  // Normalizar a 8 bits
-        }
-    }
-}
+#### Ejecución Secuencial:
+Los tiempos obtenidos para la versión secuencial fueron:
+- **real:** 0m10.506s, 0m7.466s, 0m7.466s, 0m7.668s, 0m10.489s
 
-```
+Siguiendo el procedimiento de eliminar los tiempos más bajos y más altos, y calcular el promedio:
 
-### Filtro de Realce (Sharpen Filter)
+1. **Eliminar el tiempo más bajo**: 0m7.466s
+2. **Eliminar el tiempo más alto**: 0m10.506s
+3. **Tiempos restantes**: 0m7.466s, 0m7.668s, 0m10.489s
+4. **Promedio**:
 
-```
-void aplicarFiltro(int *imagen, int *imagenProcesada, int width, int height) {
-    int kernel[3][3] = {{0, -1, 0}, {-1, 5, -1}, {0, -1, 0}};
+   $$
+   \frac{7.466 + 7.668 + 10.489}{3} = \frac{25.623}{3} = 8.541 \text{ segundos}
+   $$
+   
+El tiempo promedio de ejecución secuencial es **8.541 segundos**.
 
-    for (int y = 1; y < height - 1; y++) {
-        for (int x = 1; x < width - 1; x++) {
-            int sum = 0;
+#### Ejecución Paralela con N hilos (Número de núcleos = 8):
+Los tiempos obtenidos para la versión paralela fueron:
+- **real:** 0m7.388s, 0m7.506s, 0m7.385s, 0m7.188s, 0m10.957s
 
-            // Aplicar kernel de realce
-            for (int ky = -1; ky <= 1; ky++) {
-                for (int kx = -1; kx <= 1; kx++) {
-                    sum += imagen[(y + ky) * width + (x + kx)] * kernel[ky + 1][kx + 1];
-                }
-            }
+Siguiendo el mismo procedimiento:
 
-            // Clampeo del valor para que esté entre 0 y 255
-            imagenProcesada[y * width + x] = (sum > 255) ? 255 : (sum < 0) ? 0 : sum;
-        }
-    }
-}
+1. **Eliminar el tiempo más bajo**: 0m7.188s
+2. **Eliminar el tiempo más alto**: 0m10.957s
+3. **Tiempos restantes**: 0m7.388s, 0m7.506s, 0m7.385s
+4. **Promedio**:
 
-```
+$$
+\frac{7.388 + 7.506 + 7.385}{3} = \frac{22.279}{3} = 7.426 \text{ segundos}
+$$
+  
+Por lo tanto, el tiempo promedio de ejecución con esta versión es **7.426 segundos**.
 
+#### Ejecución Paralela con 2N hilos (Número de hilos = 16):
+Los tiempos obtenidos para la versión con 16 hilos fueron:
+- **real:** 0m7.035s, 0m7.385s, 0m7.385s, 0m7.120s
+
+Siguiendo el procedimiento:
+
+1. **Eliminar el tiempo más bajo**: 0m7.035s
+2. **Eliminar el tiempo más alto**: 0m7.385s (uno de los dos, ya que ambos tienen el mismo valor)
+3. **Tiempos restantes**: 0m7.385s, 0m7.120s
+4. **Promedio**:
+
+$$
+\frac{7.385 + 7.120}{2} = \frac{14.505}{2} = 7.253 \text{ segundos}
+$$
+
+Por lo tanto, el tiempo promedio de ejecución con los hilos configurados es **7.253 segundos**.
+
+### Cálculo del Speedup
+
+El **speedup** se calcula usando la fórmula:
+
+$$
+S = \frac{T_s}{T_p}
+$$
+
+donde:
+- $T_s$ es el tiempo de ejecución secuencial.
+- $T_p$ es el tiempo de ejecución paralelo.
+
+#### Speedup para N hilos (8 hilos):
+
+$$
+S = \frac{8.541}{7.426} = 1.150
+$$
+
+#### Speedup para 2N hilos (16 hilos):
+
+$$
+S = \frac{8.541}{7.253} = 1.178
+$$
+
+### Cálculo de la Eficiencia
+
+La **eficiencia** se calcula usando la fórmula:
+
+$$
+E = \frac{S}{P}
+$$
+
+donde:
+- $S$ es el speedup.
+- $P$ es el número de hilos.
+
+#### Eficiencia para N hilos (8 hilos):
+
+$$
+E = \frac{1.150}{8} = 0.144
+$$
+
+#### Eficiencia para 2N hilos (16 hilos):
+
+$$
+E = \frac{1.178}{16} = 0.0736
+$$
+
+### Discusión de la Eficiencia
+
+La eficiencia obtenida muestra que, aunque se logra una mejora en el tiempo de ejecución al paralelizar el código, la ganancia es modesta en términos de speedup. La eficiencia disminuye significativamente cuando se incrementa el número de hilos a 16, lo cual indica que el programa no escala linealmente con el número de hilos. Esto puede deberse a varios factores, tales como la **sobrecarga de sincronización**, la **contención en la memoria** o las **dependencias entre tareas**, que limitan el beneficio de agregar más hilos.
+
+La eficiencia de **0.144** con 8 hilos sugiere que el programa está utilizando aproximadamente el **14.4%** de la capacidad de paralelización teórica. Al aumentar a 16 hilos, la eficiencia baja a **7.36%**, lo que indica una **saturación** del rendimiento en este caso.
+
+### Conclusión
+
+El uso de OpenMP permitió una mejora moderada en el tiempo de ejecución, pero la escalabilidad se ve limitada por la naturaleza del código y las características del hardware. Una posible área de optimización sería reducir la sobrecarga de sincronización y mejorar el paralelismo de las secciones críticas del código.
+>>>>>>> 65654a495c2b48d817acd6ba0b1339f7f7ac683f
